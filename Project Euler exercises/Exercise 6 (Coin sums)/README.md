@@ -1,0 +1,1 @@
+![Problem 31](../Media/Problem31.png)
