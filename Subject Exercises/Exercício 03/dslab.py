@@ -56,10 +56,11 @@ def adguide(nf, nc, ns, lmbd, a, mode):
   be = np.sqrt((nf*k0)**2 - kf**2)
   return be,be/k0, kf, gamma_s, gamma_c, M
 
+
+
 def mercatilli(nf, nc, ns, lmbd, h, mode, m, r):
   mmax = 1000
   tol = 1e-10
-  k_new = 1
 
   if (mode=='TM'):
     pc = (nf/nc)**2
@@ -104,6 +105,8 @@ def mercatilli(nf, nc, ns, lmbd, h, mode, m, r):
         break
 
   return k
+
+
 
 def Vb(b, sigma, pc, ps, m):
   return 1/(2*np.sqrt(1-b))*(m*np.pi + np.arctan(pc*np.sqrt(b+sigma)/np.sqrt(1-b)) + np.arctan(ps*np.sqrt(b)/np.sqrt(1-b)))  
