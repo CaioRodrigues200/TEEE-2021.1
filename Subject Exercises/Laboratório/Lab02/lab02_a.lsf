@@ -1,0 +1,37 @@
+resolution = 50;
+fv = 4.4691e-06; # Final value
+mpc = 0.65; # Mesh percentage boundaries coverage
+a = linspace(1e-9 , 2*fv , resolution);
+neff = matrix(8,resolution);
+
+for(k=1:resolution){
+    
+    switchtolayout;
+    setnamed("Ar","y", a(k)/2 +(fv/2) );
+    setnamed("Ar","y span", fv );
+    setnamed("Substrato","y", -a(k)/2 - fv );
+    setnamed("Substrato","y span", 2*fv );
+    setnamed("Core","y span", a(k) );
+    
+    setnamed("FDE","y max", (a(k)/2) + mpc*fv );
+    setnamed("FDE","y min", -a(k)/2 - 2*mpc*fv );
+    findmodes;    
+    neff(1,k) = real(getdata("mode1","neff"));
+    neff(2,k) = real(getdata("mode2","neff"));
+    neff(3,k) = real(getdata("mode3","neff"));
+    neff(4,k) = real(getdata("mode4","neff"));
+    neff(5,k) = real(getdata("mode5","neff"));
+    neff(6,k) = real(getdata("mode6","neff"));
+    neff(7,k) = real(getdata("mode7","neff"));
+    neff(8,k) = real(getdata("mode8","neff"));
+}
+
+getdata("frequencysweep","loss");
+print(neff);
+V = linspace(0 , 10 , resolution);
+
+plot(V,neff(1,1:resolution),neff(2,1:resolution),neff(3,1:resolution),neff(4,1:resolution),neff(5,1:resolution),neff(6,1:resolution),neff(7,1:resolution),neff(8,1:resolution),"normalized frequency","effective index");
+legend("TE1", "TM1", "TE2", "TM2","TE3", "TM3", "TE4", "TM4"); # V x neff plot
+
+plot(a,neff(1,1:resolution),"core thickness(m)","effective index");
+legend("TE1", "TM1", "TE2", "TM2","TE3", "TM3", "TE4", "TM4"); # a x neff plot
