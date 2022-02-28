@@ -1,0 +1,19 @@
+resolution = 15;
+V = linspace(4.1803 , 5.3913 , resolution);
+lmbd = linspace(1260e-9 , 1625e-9 , resolution);
+freq = linspace(237.931e12 , 184.488e12 , resolution);
+neff = matrix(resolution);
+
+for(k=1:resolution){
+    switchtolayout;
+    setanalysis("wavelength",lmbd(k));
+    
+    findmodes;
+    neff(k) = getdata("mode1","neff");
+}
+
+print(neff);
+
+plot(V,neff,"normalized frequency","effective index");
+
+plot(freq,neff,"frequency","effective index");

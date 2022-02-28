@@ -1,0 +1,15 @@
+resolution = 10;
+freq = linspace(160e+12 , 800e+12 , resolution);
+neff = matrix(resolution);
+
+for(k=1:resolution){
+    switchtolayout;
+    setanalysis("frequency",freq(k));
+    
+    findmodes;
+    neff(k) = getdata("mode1","neff");
+}
+
+print(neff);
+
+plot(freq,neff,"frequency","effective index");

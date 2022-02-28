@@ -1,0 +1,26 @@
+resolution = 40;
+fv = 250e-09; # Final value (half final length)
+mpc = 0.65; # Mesh percentage boundaries coverage
+a = linspace(1e-9 , 2*fv , resolution);
+neff = matrix(4,resolution);
+
+for(k=1:resolution){
+    
+    switchtolayout;
+    setnamed("SiO2_upper","y", a(k)/2 + fv );
+    setnamed("SiO2_upper","y span", 2*fv );
+    setnamed("SiO2_bottom","y", -a(k)/2 - fv );
+    setnamed("SiO2_bottom","y span", 2*fv );
+    setnamed("Core","y span", a(k) );
+    
+    setnamed("FDE","y max", (a(k)/2) + 2*mpc*fv );
+    setnamed("FDE","y min", -a(k)/2 - 2*mpc*fv );
+    findmodes;    
+    neff(1,k) = real(getdata("mode1","neff"));
+    neff(2,k) = real(getdata("mode2","neff"));
+    neff(3,k) = real(getdata("mode3","neff"));
+    neff(4,k) = real(getdata("mode4","neff"));
+}
+
+plot(a,neff(1,1:resolution),neff(2,1:resolution),neff(3,1:resolution),neff(4,1:resolution),"core thickness(m)","effective index");
+legend("TE0", "TM0", "TE1", "TM1"); # a x neff plot

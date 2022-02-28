@@ -1,0 +1,26 @@
+bending = 2.5e-6;
+
+switchtolayout;
+cleardcard("Bent","Straigth");
+
+setanalysis("bent waveguide",false);
+findmodes;
+copydcard("mode1","Straigth");
+
+switchtolayout;
+setanalysis("bent waveguide",true);
+setanalysis("bend radius",bending);
+setanalysis("bend orientation",180);
+findmodes;
+bendloss = (1/10000)*abs(getdata("mode1","loss")); # dB/um
+copydcard("mode1","Bent");
+
+olap = overlap("Bent","Straigth");
+
+overmiss = -2*10*log10(olap(1)); # Overlap mismatches
+bendmiss = (bending*pi/2)*bendloss; # Bend section loss
+total_loss = overmiss + bendmiss;
+
+print(overmiss);
+print(bendmiss);
+print(total_loss);
