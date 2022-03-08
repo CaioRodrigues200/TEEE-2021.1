@@ -1,0 +1,20 @@
+resolution = 20;
+V = linspace(1 ,10 ,resolution);
+a = getnamed("Active Layer","x span");
+nf = str2num(getnamed("Active Layer","index"));
+ns = str2num(getnamed("Upper Confinement","index"));
+norm_b = matrix(1,resolution);
+
+for(k=1:resolution){
+    switchtolayout;
+    lmbd = a * (2*pi/V(k))* sqrt(nf^2 - ns^2);
+    setanalysis("wavelength",lmbd);
+    
+    findmodes;
+    neffk = real(getdata("mode4","neff"));
+    norm_b(k) = (neffk^2 - ns^2)/(nf^2 - ns^2);  
+    print(neffk); 
+}
+
+plot(V,norm_b,"V","b");
+

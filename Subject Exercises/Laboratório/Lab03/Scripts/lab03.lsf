@@ -1,0 +1,38 @@
+resolution = 20;
+gridnumber = linspace(50,800,resolution);
+FDEx = linspace(5e-6,8e-6,resolution);
+neff = matrix(resolution,resolution);
+
+for (k=1:resolution){
+    
+    switchtolayout;
+    setnamed("FDE","mesh cells x",gridnumber(k));
+    
+    for (j=1:resolution){
+        switchtolayout;
+        setnamed("FDE","x span",FDEx(j));
+        
+        findmodes;
+        neff(k,j) = real(getdata("mode4","neff"));
+    }
+}
+print(neff);
+gridML = [gridnumber(1),gridnumber(resolution)];
+FDEML = [FDEx(1),FDEx(resolution)];
+matlabput(gridML,FDEML,resolution);
+matlabput(neff);
+
+matlab("
+
+gridspace = linspace(gridML(1),gridML(2),resolution);
+FDEspace = linspace(FDEML(1),FDEML(2),resolution);
+[X,Y] = meshgrid( gridspace , FDEspace );
+
+surf(X,Y,neff);
+colorbar
+xlabel('mesh cells x');
+ylabel('x span');
+zlabel('neff');
+
+");
+
