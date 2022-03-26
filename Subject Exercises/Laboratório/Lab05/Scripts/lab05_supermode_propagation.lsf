@@ -1,0 +1,39 @@
+gap = 50e-9; # Gap between guides
+
+# Guide topology adjusting
+select("GUIA1");
+set("enabled",1);
+select("GUIA2");
+set("enabled",1);
+setnamed("GUIA1", "y", ( 500e-9 + gap )/2);
+setnamed("GUIA2", "y", -( 500e-9 + gap )/2);
+setnamed("malha_centrada", "y span", gap);
+setnamed("malha_larga", "y span", 10*gap + 1.5e-6);
+setnamed("GUIA2", "x min", -25e-6);
+setnamed("source","y", 200e-9 + gap/2);
+
+# parameters
+coupDist = 60e-6; # coupling distance
+Lprecision = 200; # longitudinal grid precision
+
+# find the modes of the couple device
+findmodes;
+
+# choose vector of L
+L = linspace(0,coupDist,Lprecision);
+y = getdata("mode1","y");
+z = getdata("mode1","z");
+nmin = 2;
+nmax = 4;
+
+E2 = matrix(length(L),length(y));
+
+# loop over all lengths and use propagate command
+for(i=1:length(L)) {
+outmode = propagate("E0",L(i),nmin,nmax);
+E2_temp = getelectric(outmode);
+cleardcard(outmode);
+E2(i,1:length(y)) = E2_temp(1,1:length(y),find(z,0.1e-6));
+}
+
+image(L*1e6,y*1e6,E2,"L (microns)","y (microns)","L x E_intensity");

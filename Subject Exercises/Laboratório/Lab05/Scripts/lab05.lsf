@@ -1,0 +1,31 @@
+GdSelect = 1; # Guide selection for individual analysis
+# set 1 for enabling only guide 1, and so on
+gap = 50e-9; # Gap between guides
+switchtolayout;
+
+# Guide topology adjusting
+select("GUIA1");
+set("enabled",1);
+select("GUIA2");
+set("enabled",1);
+setnamed("GUIA1", "y", ( 500e-9 + gap )/2);
+setnamed("GUIA2", "y", -( 500e-9 + gap )/2);
+setnamed("malha_centrada", "y span", gap);
+setnamed("malha_larga", "y span", 10*gap + 1.5e-6);
+setnamed("GUIA2", "x min", -25e-6);
+setnamed("source","y", 200e-9 + gap/2);
+
+
+setactivesolver("FDE");
+
+if(GdSelect == 1){
+    select("GUIA2");
+}
+else{
+    select("GUIA1");
+}
+    
+set("enabled",0);
+findmodes;
+cleardcard("E0");
+copydcard("mode1","E0");

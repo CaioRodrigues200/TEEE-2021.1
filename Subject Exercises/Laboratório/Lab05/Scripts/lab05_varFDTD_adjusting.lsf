@@ -1,0 +1,20 @@
+# Adjusting waveguide for varFDTD analysis
+
+# disabling the clamp index option and set the 100 nm gap
+clamp = 1; # 0 for disabling, 1 for enabling
+
+setnamed("varFDTD", "clamp values to physical material properties", clamp);
+
+# Selecting new gap length for adjusting coupling simulation results
+gap = 50e-9;
+
+# Gap insertion
+setnamed("GUIA1", "y", ( 500e-9 + gap )/2);
+setnamed("GUIA2", "y", -( 500e-9 + gap )/2);
+setnamed("malha_centrada", "y span", gap);
+setnamed("malha_larga", "y span", 10*gap + 1.5e-6);
+setnamed("source","y", 200e-9 + gap/2);
+
+# introducing the abrupt waveguide and run the simulation
+setnamed("GUIA2", "x min", -18e-6);
+run;
