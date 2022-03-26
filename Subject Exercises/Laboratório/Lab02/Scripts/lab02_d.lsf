@@ -1,3 +1,11 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Lab02_d script
+###################################################################
+
 switchtolayout;
 findmodes;
 selectmode(1);

@@ -1,3 +1,11 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Lab04a_a script
+###################################################################
+
 resolution = 15;
 V = linspace(4.1803 , 5.3913 , resolution);
 lmbd = linspace(1260e-9 , 1625e-9 , resolution);

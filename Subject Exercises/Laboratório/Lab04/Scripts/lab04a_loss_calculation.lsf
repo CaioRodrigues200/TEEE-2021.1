@@ -1,3 +1,11 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Lab04a_loss_calculation script
+###################################################################
+
 bending = 2.5e-6;
 
 switchtolayout;

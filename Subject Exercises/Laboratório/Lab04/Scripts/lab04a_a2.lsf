@@ -1,3 +1,11 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Lab04a_a2 script
+###################################################################
+
 resolution = 10;
 freq = linspace(160e+12 , 800e+12 , resolution);
 neff = matrix(resolution);

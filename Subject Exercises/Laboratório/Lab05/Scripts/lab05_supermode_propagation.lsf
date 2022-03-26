@@ -1,3 +1,11 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Lab05 supermode propagation script
+###################################################################
+
 gap = 50e-9; # Gap between guides
 
 # Guide topology adjusting

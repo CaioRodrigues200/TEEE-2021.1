@@ -1,3 +1,11 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Lab03 script
+###################################################################
+
 resolution = 10;
 gridnumber = linspace(50,800,resolution);
 FDEx = linspace(5e-6,8e-6,resolution);

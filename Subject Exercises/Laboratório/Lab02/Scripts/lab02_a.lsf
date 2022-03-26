@@ -1,3 +1,11 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Lab02_a script
+###################################################################
+
 resolution = 50;
 fv = 4.4691e-06; # Final value
 mpc = 0.65; # Mesh percentage boundaries coverage

@@ -1,3 +1,11 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Lab05 script
+###################################################################
+
 GdSelect = 1; # Guide selection for individual analysis
 # set 1 for enabling only guide 1, and so on
 gap = 50e-9; # Gap between guides
