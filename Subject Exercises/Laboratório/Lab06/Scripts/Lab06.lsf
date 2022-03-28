@@ -1,0 +1,98 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Lab06 script
+###################################################################
+
+###################################################################
+# FUNCTIONS
+
+function adjust_splitter(spLS,spLW,spYspan,varXop,varYop){
+    switchtolayout;
+    # Defining varFDTD and monitors dimensions
+    setnamed("varFDTD","x max",(spLS + 2*spLW) * varXop);
+    setnamed("varFDTD","y span",spYspan * varYop);
+    setnamed("profile_monitor","x max",(spLS + 2*spLW) * varXop);
+    setnamed("profile_monitor","y span",spYspan * varYop);
+    setnamed("movie_monitor","x max",(spLS + 2*spLW) * varXop);
+    setnamed("movie_monitor","y span",spYspan * varYop);
+    
+    # Positioning output monitors
+    setnamed("output 1","x",spLS + spLW + 2e-6);
+    setnamed("output 1","y", spYspan/2);
+    setnamed("output 2","x",spLS + spLW + 2e-6);
+    setnamed("output 2","y", -spYspan/2);
+    
+    # Defining Y-splitter dimensions
+    select("y-splitter");
+    set("Ls",spLS);
+    set("Lw",spLW);
+    set("y span",spYspan);
+}
+###################################################################
+
+###################################################################
+# PARAMETERS
+
+#spLS = 6e-6; # Y-splitter Ls variable
+spLW = 4e-6; # Y-splitter Lw variable
+#spYspan = 6e-6; # Y-splitter y span variable
+
+varXop = 0.92; # varFDTD x spacing ratio in regard to splitter's length
+varYop = 1.7; # varFDTD y spacing ratio in regard to splitter's width
+
+LSLimits = [3e-6 , 5e-6]; # Limits for "Ls" sweeping
+YspanLimits = [3e-6 , 5e-6]; # Limits for "y span" sweeping
+LSPoints = 3; # Number of points for "Ls" verified 
+YspanPoints = 3; # Number of points for "y span" verified 
+###################################################################
+
+
+LSRange = linspace(LSLimits(1),LSLimits(2),LSPoints);
+YspanRange = linspace(YspanLimits(1),YspanLimits(2),YspanPoints);
+Tout = matrix(LSPoints,YspanPoints);
+Tin = matrix(LSPoints,YspanPoints);
+fpoints = getnamed("output 1","frequency points");
+
+#adjust_splitter(spLS,spLW,spYspan,varXop,varYop);
+for (k=1:LSPoints){
+    
+    for (j=1:YspanPoints){
+        
+        spLS = LSRange(k);
+        spYspan = YspanRange(j);        
+        
+        adjust_splitter(spLS,spLW,spYspan,varXop,varYop);
+        run;
+        
+        ToutVec = transmission("output 1");
+        TinVec = transmission("input");
+        Tout(k,j) = ToutVec(ceil(fpoints/2));
+        Tin(k,j) = TinVec(ceil(fpoints/2)); 
+        #fvector = getdata("output 1","f");
+        #plot(c/fvector*1e6, ToutVec, "wavelength(um)", "transmission");
+    
+        # Reducing .lms file size clearing source data
+        switchtolayout;
+        select("source");
+        clearsourcedata;
+    }
+}  
+
+matlabput(LSRange,YspanRange);
+matlabput(Tout,Tin);
+
+matlab("
+
+Ttotal = Tout./Tin;
+
+[X,Y] = meshgrid(YspanRange,LSRange);
+surf(X,Y,Ttotal);
+colorbar
+xlabel('y span');
+ylabel('Ls');
+zlabel('Transmission Ratio');
+
+");
