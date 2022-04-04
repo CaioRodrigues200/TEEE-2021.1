@@ -1,0 +1,193 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Projeto Acoplador direcional 2x2 de banda larga utilizando
+# estrutura de grade em regime de subcomrpimento de onda (SWG)
+# projetado em dispersões
+
+# Lumerical MODE DC Assembly
+###################################################################
+
+###################################################################
+# FUNCTIONS
+
+function adjust_coupler(LW,LC,LS,YSPAN,GAP,SWG,V,G){
+    switchtolayout;
+    
+    # defining coupler/substract dimensions
+    select("directional coupler");
+    set("x",0);
+    set("Lw",LW); 
+    set("Lc",LC);
+    set("Ls",LS); 
+    set("y span",YSPAN);   
+    set("gap",GAP);
+    
+    setnamed("Substract","x",(2*LW+LC+2*LS)/2);
+    setnamed("Substract","x span",2*LW+LC+2*LS);
+    setnamed("Substract","y span",1.5*YSPAN + 3.5e-6);
+    
+    # varFDTD, monitors and sources set
+    setnamed("varFDTD","x",(2*LW+LC+2*LS)/2);
+    setnamed("varFDTD","x span",1.2*LW+LC+2*LS);
+    setnamed("varFDTD","y span",YSPAN + 2e-6);
+    
+    setnamed("Profile_monitor","x",(2*LW+LC+2*LS)/2);
+    setnamed("Profile_monitor","x span",1.2*LW+LC+2*LS);
+    setnamed("Profile_monitor","y span",YSPAN + 2e-6);
+    
+    setnamed("Input","y",YSPAN*0.5);
+    setnamed("Input","x",LW*0.85);
+    setnamed("Output 1","y",YSPAN*0.5);
+    setnamed("Output 1","x",LW*1.15+LC+2*LS);
+    setnamed("Output 2","y",-YSPAN*0.5);
+    setnamed("Output 2","x",LW*1.15+LC+2*LS);
+    setnamed("Later_input","y",GAP/2 + 0.275e-6);
+    setnamed("Later_input","x",LW+LS);
+    setnamed("Later_output_1","y",GAP/2 + 0.275e-6);
+    setnamed("Later_output_1","x",LW+LS+LC);
+    setnamed("Later_output_2","y",-GAP/2 - 0.275e-6);
+    setnamed("Later_output_2","x",LW+LS+LC);
+    
+    setnamed("source","x",LW*0.7);
+    setnamed("source","y",YSPAN*0.5);
+    setnamed("inner_source","x",LW+LS+0.1*LC);
+    setnamed("inner_source","y",GAP*0.5);
+    setnamed("inner_source","y span",2*GAP+2e-6);
+    
+    selectpartial("SWGrect");
+    delete;
+    
+    if (SWG == 1){
+        i = 1;
+        for (0; i <= floor(LC/V) - 1 ;0){
+            rectname = "SWGrect " + num2str(i);
+            addrect;
+            set("name",rectname);
+            set("x",LW+LS + (2*i*V + V - G)/2 );
+            set("x span",V-G);
+            set("z",0);
+            set("z span",0.26e-6);
+            set("y",0);
+            set("y span",GAP + 0.9e-6 + 3.6e-6);
+            set("material","Si (Silicon) - Palik");
+            set("override mesh order from material database",1);   
+            set("mesh order",3);  
+            
+            setnamed("Substract","y span",1.5*YSPAN + 3.5e-6 + 3.6e-6); 
+            setnamed("varFDTD","y span",YSPAN + 2e-6 + 3.6e-6); 
+            setnamed("Profile_monitor","y span",YSPAN + 2e-6 + 3.6e-6);   
+            
+            i = i+1;
+        }
+    }
+}
+###################################################################
+
+###################################################################
+# PARAMETERS
+
+Lw = 4e-6; # Length of the four individual straight waveguide sectio
+Lc = 20.1e-6; # Length of the central straight waveguide sections for coupling
+Ls = 4e-6; # x span of the four individual s-bend sections
+Yspan = 1.45e-6; # Center-to-center distance between the two input ports
+gap = 0.5e-6; # Gap between two coupling sections
+
+SWG = 1; # Enable SWG structure
+V = 0.271e-6; # Pitch
+G = 0.2114e-6; # Gap between gratings 
+
+tSweep = 0; # Enable Sweep transmission analysis
+LcLimits = [19e-6, 23e-6]; # Lc Range for sweeping
+DCLimits = [0.206,0.246]; # DutyCycle range for sweeping
+LcPoints = 5; # Sweepping points for Lc
+DCPoints = 10; # Sweeping points for Duty Cycle
+CVal = 0.5; # Reference value for transmission (in output 1) difference sum method 
+
+###################################################################
+
+# Setting simulation objects
+switchtolayout;
+setactivesolver("varFDTD");
+select("FDE_mesh");
+set("enabled",0);
+
+select("directional coupler::bend_bottom_left");
+set("enabled",1);
+select("directional coupler::bend_bottom_right");
+set("enabled",1);
+select("directional coupler::bend_top_left");
+set("enabled",1);
+select("directional coupler::bend_top_right");
+set("enabled",1);
+select("directional coupler::wg_bottom_left");
+set("enabled",1);
+select("directional coupler::wg_bottom_right");
+set("enabled",1);
+select("directional coupler::wg_top_left");
+set("enabled",1);
+select("directional coupler::wg_top_right");
+set("enabled",1);
+
+print("Number of periods (P) = " + num2str( floor(Lc/V) - 1));
+fpoints = getnamed("Output 1","frequency points");
+
+if (tSweep == 0){
+    adjust_coupler(Lw,Lc,Ls,Yspan,gap,SWG,V,G);
+    run;
+    
+    tsum1 = 0;
+    tsum2 = 0;
+    tVector1 = transmission("Output 1");
+    tVector2 = transmission("Output 2");
+    for(i=1:25){
+        tsum1 = tsum1 + (tVector1(i) - CVal)^2;
+        tsum2 = tsum2 + (tVector2(i) - (1.0 - CVal))^2;
+    }
+    print(tsum1+tsum2);
+}
+else{
+    LcRange = linspace(LcLimits(1),LcLimits(2),LcPoints);
+    DCRange = linspace(DCLimits(1),DCLimits(2),DCPoints);
+    tValues = matrix(LcPoints,DCPoints);
+    
+    for (k=1:LcPoints){
+        for (j=1:DCPoints){
+            
+            tsum1 = 0;
+            tsum2 = 0;
+            print("Sweeping progress: " + num2str((k-1)*DCPoints + j) + " of " + num2str(LcPoints*DCPoints));
+            adjust_coupler(Lw,LcRange(k),Ls,Yspan,gap,SWG,(G/(1-DCRange(j))),G);
+            run;
+            tVector1 = transmission("Output 1");
+            tVector2 = transmission("Output 2");
+            for(i=1:fpoints){
+                tsum1 = tsum1 + (tVector1(i) - CVal)^2;
+                tsum2 = tsum2 + (tVector2(i) - (1.0 - CVal))^2;
+            }
+            tValues(k,j) = tsum1 + tsum2;
+        } 
+    }
+    
+    matlabput(LcRange,DCRange);
+    matlabput(tValues);
+    
+    matlab("
+    
+    
+    [X,Y] = meshgrid(DCRange,LcRange);
+    surf(X,Y,tValues);
+    colorbar
+    xlabel('Duty Cycle');
+    ylabel('Lc');
+    zlabel('Proximity');
+    
+    ");
+}
+
+# Reducing .lms file size clearing source data
+switchtolayout;
+select("source");
+clearsourcedata;

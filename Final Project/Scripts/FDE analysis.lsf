@@ -1,0 +1,118 @@
+###################################################################
+# By Caio Rodrigues for subject TEEE photonics applied on silicon (2022)
+
+# Professor: Adolfo Hebster 
+
+# Projeto Acoplador direcional 2x2 de banda larga utilizando
+# estrutura de grade em regime de subcomrpimento de onda (SWG)
+# projetado em dispersões
+
+# Lumerical MODE DC FDE analysis
+###################################################################
+
+###################################################################
+# PARAMETERS
+
+Lc = 20e-6; # Length of the central straight waveguide sections for coupling
+gap = 0.028e-6; # Gap between two coupling sections
+
+SWG = 0; # Enable SWG structure
+V = 0.271e-6; # Pitch
+G = 0.2114e-6; # Gap between gratings
+
+gapSweep = 0; # Enable neff x gap sweep analysis
+gapPoints = 10; # Precision of gap sweeping
+gapLimits = [0.2e-6,0.3e-6]; # Limits of gap sweeping
+
+###################################################################
+
+# Setting simulation objects
+switchtolayout;
+setactivesolver("FDE");
+select("FDE_mesh");
+set("enabled",1);
+
+select("directional coupler::bend_bottom_left");
+set("enabled",0);
+select("directional coupler::bend_bottom_right");
+set("enabled",0);
+select("directional coupler::bend_top_left");
+set("enabled",0);
+select("directional coupler::bend_top_right");
+set("enabled",0);
+select("directional coupler::wg_bottom_left");
+set("enabled",0);
+select("directional coupler::wg_bottom_right");
+set("enabled",0);
+select("directional coupler::wg_top_left");
+set("enabled",0);
+select("directional coupler::wg_top_right");
+set("enabled",0);
+
+select("directional coupler");
+Ls = get("Ls");
+Lw = get("Lw");
+
+set("gap",gap);
+set("Lc",Lc);
+set("x",-(Ls+Lw));
+
+setnamed("Substract","x",Lc/2);
+setnamed("Substract","x span",Lc);
+setnamed("Substract","y span",2*gap + 4e-6);
+
+setnamed("FDE","x",Lc/2);
+setnamed("FDE","y span",2*gap + 2e-6);
+setnamed("FDE_mesh","x",Lc/2);
+setnamed("FDE_mesh","y span",gap + 1e-6);
+setnamed("FDE_mesh_inner","x",Lc/2);
+setnamed("FDE_mesh_inner","y span",1.05*gap);
+
+selectpartial("SWGrect");
+delete;
+    
+if (SWG == 1){
+    setnamed("Substract","y span",2*gap + 4e-6 + 3.6e-6);    
+    
+    i = 1;
+    for (0; i <= floor(Lc/V) - 1 ;0){
+       rectname = "SWGrect " + num2str(i);
+       addrect;
+       set("name",rectname);
+       set("x", (2*i*V + V - G)/2 );
+       set("x span",V-G);
+       set("z",0);
+       set("z span",0.26e-6);
+       set("y",0);
+       set("y span",gap + 0.9e-6 + 3.6e-6);
+       set("material","Si (Silicon) - Palik");
+       set("override mesh order from material database",1);   
+       set("mesh order",3);     
+            
+       i = i+1;
+    }
+}
+
+if (gapSweep == 1){
+    
+    gapRange = linspace(gapLimits(1),gapLimits(2),gapPoints);
+    nDiffVector = matrix(gapPoints);    
+    
+    for (i=1:gapPoints){
+        switchtolayout;
+        select("directional coupler");
+        set("gap",gapRange(i));
+        findmodes;
+        
+        neff1 = real(getdata("mode1","neff"));
+        neff2 = real(getdata("mode2","neff"));
+        nDiffVector(i) = neff1 - neff2;
+    }
+    
+    plot(gapRange,nDiffVector,"gap","neff diff");
+}
+
+# Reducing .lms file size clearing source data
+switchtolayout;
+select("source");
+clearsourcedata;
